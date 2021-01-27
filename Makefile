@@ -1,7 +1,8 @@
 GOBIN=$(shell pwd)/bin
 GOFILES=$(wildcard *.go)
 GONAME=dex-k8s-authenticator
-TAG=latest
+REPOSITORY=docker.otenv.com/${GONAME}
+TAG=$(shell date +%Y%m%d%H%M%S)
 
 all: build 
 
@@ -11,7 +12,9 @@ build:
 
 container:
 	@echo "Building container image"
-	docker build -t ${GONAME}:${TAG} .
+	docker build -t ${REPOSITORY}:${TAG} .
+	@echo "Push container image"
+	docker push ${REPOSITORY}:${TAG}
 
 clean:
 	@echo "Cleaning"

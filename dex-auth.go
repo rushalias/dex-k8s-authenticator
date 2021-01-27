@@ -72,6 +72,8 @@ func (cluster *Cluster) handleCallback(w http.ResponseWriter, r *http.Request) {
 	tokenData := cluster.renderCredentials(w, r)
 
 	if strings.HasPrefix(r.URL.Path, "/callback/redirect-to-k8s-dashbaord") {
+		log.Printf("Handling redirect %s\n", r.URL.Path)
+
 		// set the auth header
 		w.Header().Set("Authorization", "Bearer "+tokenData.IDToken)
 
