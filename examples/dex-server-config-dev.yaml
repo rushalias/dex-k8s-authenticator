@@ -5,6 +5,13 @@ storage:
     file: examples/dex.db
 listen: http://0.0.0.0:5555
 
+web:
+  http: 0.0.0.0:5556
+  # Uncomment for HTTPS options.
+  # https: 127.0.0.1:5554
+  # tlsCert: /etc/dex/tls.crt
+  # tlsKey: /etc/dex/tls.ke
+
 expiry:
   signingKeys: "10m"
   idTokens: "30m"
@@ -28,6 +35,8 @@ staticClients:
   secret: ZXhhbXBsZS1hcHAtc2VjcmV0
   redirectURIs:
     - http://127.0.0.1:5555/callback/example-cluster
+    - http://127.0.0.1:5555/callback/redirect-to-k8s-dashbaord
+    - http://127.0.0.1:5555/callback/example-cluster-three
 
 enablePasswordDB: True
 

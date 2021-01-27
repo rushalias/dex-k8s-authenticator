@@ -4,16 +4,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/coreos/go-oidc"
-	"github.com/spf13/cast"
-	"github.com/spf13/viper"
-	"golang.org/x/oauth2"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"path"
+	"regexp"
 	"strings"
 	"time"
+
+	"github.com/coreos/go-oidc"
+	"github.com/spf13/cast"
+	"github.com/spf13/viper"
+	"golang.org/x/oauth2"
 )
 
 const exampleAppState = "Vgn2lp5QnymFtLntKX5dM8k773PwcM87T4hQtiESC1q8wkUBgw5D3kH0r5qJ"
@@ -46,16 +48,18 @@ func (cluster *Cluster) handleLogin(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Handling login-uri for: %s", cluster.Name)
 	authCodeURL := cluster.oauth2Config(scopes).AuthCodeURL(exampleAppState, oauth2.AccessTypeOffline)
 	log.Printf("Redirecting post-loginto: %s", authCodeURL)
+
+	// redirect to Dex
 	http.Redirect(w, r, authCodeURL, http.StatusSeeOther)
 }
 
 func (cluster *Cluster) handleScript(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Handling script callback for: %s", cluster.Name)
-  w.Header().Add("Content-Type", "application/octet-stream")
+	w.Header().Add("Content-Type", "application/octet-stream")
 
-  tokenData := cluster.renderCredentials(w, r)
+	tokenData := cluster.renderCredentials(w, r)
 
-  err := textTemplates.ExecuteTemplate(w, "scripttemplate", tokenData)
+	err := textTemplates.ExecuteTemplate(w, "scripttemplate", tokenData)
 
 	if err != nil {
 		log.Fatal(err)
@@ -65,9 +69,24 @@ func (cluster *Cluster) handleScript(w http.ResponseWriter, r *http.Request) {
 func (cluster *Cluster) handleCallback(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Handling callback for: %s", cluster.Name)
 
-  tokenData := cluster.renderCredentials(w, r)
+	tokenData := cluster.renderCredentials(w, r)
 
-  err := templates.ExecuteTemplate(w, "kubeconfig.html", tokenData)
+	if strings.HasPrefix(r.URL.Path, "/callback/redirect-to-k8s-dashbaord") {
+		// set the auth header
+		w.Header().Set("Authorization", "Bearer "+tokenData.IDToken)
+
+		// compute envirnoment (eg. central-pp-rs)
+		environment, err := cluster.computeClusterEnvirnoment()
+		if err == nil {
+			k8sDashboardURI := fmt.Sprintf("https://dashboard.%s.k8s.otenv.com/#/overview?namespace=default", environment)
+			log.Printf("Redirecting to %s\n", k8sDashboardURI)
+			http.Redirect(w, r, k8sDashboardURI, 301)
+			return
+		}
+	}
+
+	// fallback to just rendering the template
+	err := templates.ExecuteTemplate(w, "kubeconfig.html", tokenData)
 
 	if err != nil {
 		log.Fatal(err)
@@ -149,7 +168,7 @@ func (cluster *Cluster) renderCredentials(w http.ResponseWriter, r *http.Request
 		IdpCaPem = cast.ToString(content)
 	}
 
-  // rawIDToken
+	// rawIDToken
 	refreshToken,
 		idpCaURI,
 		idpCaPem,
@@ -196,4 +215,20 @@ func (cluster *Cluster) renderCredentials(w http.ResponseWriter, r *http.Request
 		Web_Path_Prefix:   webPathPrefix,
 		StaticContextName: cluster.Static_Context_Name,
 		KubectlVersion:    kubectlVersion}
+}
+
+/*
+Compute cluster name from from k8s master URI
+eg.
+    central-ci-rs,
+    central-pp-rs
+*/
+func (cluster *Cluster) computeClusterEnvirnoment() (string, error) {
+	var regExpression = regexp.MustCompile(`^https://k8s-(.+)\.otenv\.com$`)
+	var res = regExpression.FindStringSubmatch(cluster.K8s_Master_URI)
+	if res == nil {
+		log.Fatalf("Unable to compute cluster envirnoment from %s", cluster.K8s_Master_URI)
+		return "unknown", fmt.Errorf("Unable to compute cluster envirnoment from")
+	}
+	return res[1], nil
 }

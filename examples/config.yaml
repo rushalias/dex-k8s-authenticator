@@ -1,15 +1,97 @@
 clusters:
   # Specify 1 or more clusters
-  - name: example-cluster
+  - name: example-cluster-number-one
 
     # Descriptions used in the WebUI
-    short_description: "Example Cluster"
+    short_description: "Example Cluster THE one"
     description: "Example Cluster Long Description..."
 
     # Redirect Url pointing to dex-k8s-authenticator callback for this cluster
     # This should be configured in Dex as part of the staticClients
     # redirectURIs option
     redirect_uri: http://127.0.0.1:5555/callback/example-cluster
+
+    # Client Secret - should match value in Dex
+    client_secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+
+    # Client ID - should match value in Dex
+    client_id: example-cluster-client-id
+
+    # Dex Issuer - Must be resolvable
+    issuer:  http://127.0.0.1:5556
+
+    # Url to k8s API endpoint - used in WebUI instructions for generating
+    # kubeconfig
+    k8s_master_uri: https://your-k8s-master.cluster
+
+    # don't use username for context
+    static_context_name: false
+
+    # CA for your k8s cluster - used in WebUI instructions for generating
+    # kubeconfig
+    # Both k8s_ca_uri and k8s_ca_pem are optional - you typically specifiy
+    # one or the other if required
+    #
+    # Provides a link to the CA from a hosted site
+    # k8s_ca_uri: http://url-to-your-ca.crt
+    #
+    # Provides abililty to specify CA inline
+    # k8s_ca_pem: |
+    #   -----BEGIN CERTIFICATE-----
+    #   ...
+    #   -----END CERTIFICATE-----
+  
+  - name: redirect-to-k8s-dashbaord
+
+    # Descriptions used in the WebUI
+    short_description: "Example K8s Dashboard"
+    description: "Example K8s Dashboard..."
+
+    # Redirect Url pointing to dex-k8s-authenticator callback for this cluster
+    # This should be configured in Dex as part of the staticClients
+    # redirectURIs option
+    redirect_uri: http://127.0.0.1:5555/callback/redirect-to-k8s-dashbaord
+
+    # Client Secret - should match value in Dex
+    client_secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+
+    # Client ID - should match value in Dex
+    client_id: example-cluster-client-id
+
+    # Dex Issuer - Must be resolvable
+    issuer:  http://127.0.0.1:5556
+
+    # Url to k8s API endpoint - used in WebUI instructions for generating
+    # kubeconfig
+    k8s_master_uri: https://k8s-central-pp-rs.otenv.com
+
+    # don't use username for context
+    static_context_name: false
+
+    # CA for your k8s cluster - used in WebUI instructions for generating
+    # kubeconfig
+    # Both k8s_ca_uri and k8s_ca_pem are optional - you typically specifiy
+    # one or the other if required
+    #
+    # Provides a link to the CA from a hosted site
+    # k8s_ca_uri: http://url-to-your-ca.crt
+    #
+    # Provides abililty to specify CA inline
+    # k8s_ca_pem: |
+    #   -----BEGIN CERTIFICATE-----
+    #   ...
+    #   -----END CERTIFICATE-----
+
+  - name: example-cluster-number-three
+
+    # Descriptions used in the WebUI
+    short_description: "Example Cluster Trois "
+    description: "Example Cluster Long Description..."
+
+    # Redirect Url pointing to dex-k8s-authenticator callback for this cluster
+    # This should be configured in Dex as part of the staticClients
+    # redirectURIs option
+    redirect_uri: http://127.0.0.1:5555/callback/example-cluster-three
 
     # Client Secret - should match value in Dex
     client_secret: ZXhhbXBsZS1hcHAtc2VjcmV0
