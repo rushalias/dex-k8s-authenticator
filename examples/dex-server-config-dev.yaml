@@ -35,7 +35,7 @@ staticClients:
   secret: ZXhhbXBsZS1hcHAtc2VjcmV0
   redirectURIs:
     - http://127.0.0.1:5555/callback/example-cluster
-    - http://127.0.0.1:5555/callback/redirect-to-k8s-dashbaord
+    - http://127.0.0.1:5555/callback/redirect-to-k8s-dashboard 
     - http://127.0.0.1:5555/callback/example-cluster-three
 
 enablePasswordDB: True
