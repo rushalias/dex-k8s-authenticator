@@ -71,14 +71,14 @@ func (cluster *Cluster) handleCallback(w http.ResponseWriter, r *http.Request) {
 
 	tokenData := cluster.renderCredentials(w, r)
 
-	if strings.HasPrefix(r.URL.Path, "/callback/redirect-to-k8s-dashbaord") {
+	if strings.HasPrefix(r.URL.Path, "/callback/redirect-to-k8s-dashboard") {
 		log.Printf("Handling redirect %s\n", r.URL.Path)
 
 		// set the auth header
 		w.Header().Set("Authorization", "Bearer "+tokenData.IDToken)
 
 		// compute envirnoment (eg. central-pp-rs)
-		environment, err := cluster.computeClusterEnvirnoment()
+		environment, err := cluster.computeClusterEnvironment()
 		if err == nil {
 			k8sDashboardURI := fmt.Sprintf("https://dashboard.%s.k8s.otenv.com/#/overview?namespace=default", environment)
 			log.Printf("Redirecting to %s\n", k8sDashboardURI)
@@ -225,12 +225,12 @@ eg.
     central-ci-rs,
     central-pp-rs
 */
-func (cluster *Cluster) computeClusterEnvirnoment() (string, error) {
+func (cluster *Cluster) computeClusterEnvironment() (string, error) {
 	var regExpression = regexp.MustCompile(`^https://k8s-(.+)\.otenv\.com$`)
 	var res = regExpression.FindStringSubmatch(cluster.K8s_Master_URI)
 	if res == nil {
-		log.Fatalf("Unable to compute cluster envirnoment from %s", cluster.K8s_Master_URI)
-		return "unknown", fmt.Errorf("Unable to compute cluster envirnoment from")
+		log.Fatalf("Unable to compute cluster environment from %s", cluster.K8s_Master_URI)
+		return "unknown", fmt.Errorf("Unable to compute cluster environment from")
 	}
 	return res[1], nil
 }
